@@ -34,9 +34,9 @@ jobs:
           node-version: 20
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci || npm install
 
       - name: Run Unit Tests
         env:
           MONGO_URI_TEST: mongodb://root:example@127.0.0.1:27017/productdb_test?authSource=admin
-        run: npm test
+        run: npx jest --detectOpenHandles --forceExit
