@@ -10,6 +10,20 @@ jobs:
   test-ci:
     runs-on: ubuntu-latest
 
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: example
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -22,5 +36,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Test Syntax & App Load
-        run: node -c src/app.js src/server.js src/models/product.model.js
+      - name: Run Unit Tests
+        env:
+          MONGO_URI_TEST: mongodb://root:example@127.0.0.1:27017/productdb_test?authSource=admin
+        run: npm test
