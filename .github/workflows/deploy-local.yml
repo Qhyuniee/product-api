@@ -30,5 +30,11 @@ jobs:
 
       - name: Verify API health
         run: |
-          timeout /t 15 /nobreak
-          curl.exe --fail http://localhost:5000/health
+          for /L %%i in (1,1,10) do (
+            curl.exe --fail --silent http://localhost:5000/health && exit /b 0
+            echo API not ready - retry %%i/10
+            ping 127.0.0.1 -n 4 > nul
+          )
+          docker compose -f docker-compose-prod.yaml ps
+          docker logs product_api_prod
+          exit /b 1
