@@ -55,4 +55,4 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/product-api:latestv
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/product-api:latest
