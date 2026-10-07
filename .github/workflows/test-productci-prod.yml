@@ -1,0 +1,81 @@
+name: Product CI Production Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-product-api:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      PORT: 5000
+      MONGO_URI: mongodb://localhost:27017/productdb
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check server.js
+          node --check src/models/Product.js
+          node --check src/routes/productRoutes.js
+
+      - name: Start Product API
+        run: |
+          node server.js &
+          echo $! > server.pid
+
+      - name: Wait for API healthcheck
+        run: |
+          for i in {1..10}; do
+            if curl -f http://localhost:5000/health; then
+              exit 0
+            fi
+            sleep 3
+          done
+          exit 1
+
+      - name: Test CREATE Product
+        run: |
+          curl -f -X POST http://localhost:5000/api/products \
+            -H "Content-Type: application/json" \
+            -d '{"pid":"P001","pname":"But bi","price":5000,"quantity":10}'
+
+      - name: Test READ Product
+        run: |
+          curl -f http://localhost:5000/api/products/P001
+
+      - name: Test UPDATE Product
+        run: |
+          curl -f -X PUT http://localhost:5000/api/products/P001 \
+            -H "Content-Type: application/json" \
+            -d '{"pname":"But bi xanh","price":6000,"quantity":20}'
+
+      - name: Test DELETE Product
+        run: |
+          curl -f -X DELETE http://localhost:5000/api/products/P001
