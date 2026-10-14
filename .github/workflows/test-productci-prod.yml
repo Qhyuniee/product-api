@@ -41,13 +41,14 @@ jobs:
 
       - name: Check JavaScript syntax
         run: |
-          node --check server.js
-          node --check src/models/Product.js
-          node --check src/routes/productRoutes.js
+          node --check app.js
+          node --check controllers/productController.js
+          node --check models/Product.js
+          node --check routes/productRoutes.js
 
       - name: Start Product API
         run: |
-          node server.js &
+          node app.js &
           echo $! > server.pid
 
       - name: Wait for API healthcheck
