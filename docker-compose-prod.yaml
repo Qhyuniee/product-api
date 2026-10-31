@@ -2,6 +2,7 @@ services:
   mongodb:
     image: mongo:6.0
     container_name: mongodb_prod
+    restart: unless-stopped
     ports:
       - "27017:27017"
     volumes:
@@ -15,6 +16,7 @@ services:
   product-api:
     image: qhyuniee/product-api:latest
     container_name: product_api_prod
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
