@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Trang chủ
 app.get("/", (req, res) => {
-  res.json({ message: "Product API is running" });
+  res.json({ message: "welcome to Product API" });
 });
 
 // Health check
